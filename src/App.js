@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import classes from './App.module.scss';
 import Auth from './auth/Auth';
 
