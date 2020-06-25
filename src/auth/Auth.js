@@ -1,18 +1,22 @@
 import React, { Component } from 'react';
-import Button from '@material-ui/core/Button';
+import Login from './components/login/Login';
+import classes from './Auth.module.scss';
+import { Provider } from "react-redux";
+import store from '../shared/store/Store'
 
 class Auth extends Component {
+
+    showResults = (values) => {
+        window.alert(`You submitted:\n\n${JSON.stringify(values, null, 2)}`);
+    }
+
     render() {
         return (
-            <div>
-                Auth Component working!!
-                <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                >Sign In</Button>
-            </div>
+            <Provider store={store}>
+                <div className={classes.Auth}>
+                    <Login onSubmit={this.showResults}/>
+                </div>
+            </Provider>
         );
     }
 }
