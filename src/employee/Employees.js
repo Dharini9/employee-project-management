@@ -7,9 +7,38 @@ import AddEmployee from './components/new-employee/AddEmployee';
 const { Header, Content, Footer } = Layout;
 
 class Employee extends Component {
+    employeeDetails;
+    state = {
+        isUpdatingEmployeeDetails: false
+    }
 
     onAddEmployeeFormSubmit = (values) => {
         console.log(values);
+    }
+
+    changeNavigation = (selectedItem) => {
+        console.log(selectedItem);
+    }
+
+    editEmployeeDetails = (details) => {
+        console.log(details);
+        this.employeeDetails = details;
+        this.setState(state => ({
+            ...state,
+            isUpdatingEmployeeDetails: true
+        }));
+    }
+
+    onSuccessUpdatingEmployeeDetails = (data) => {
+        console.log(data);
+        this.setState(state => ({
+            ...state,
+            isUpdatingEmployeeDetails: false
+        }));
+    }
+
+    deleteEmployeeDetails = (employeeID) => {
+        console.log(employeeID);
     }
 
     render() {
@@ -18,7 +47,8 @@ class Employee extends Component {
                 <Layout className="layout">
                     <Header>
                         <div className={styles.logo} />
-                        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['Employees']}>
+                        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['Employees']}
+                            onClick={this.changeNavigation}>
                             <Menu.Item key="Employees">Employees</Menu.Item>
                             <Menu.Item key="AddNewEmployee">Add new Employee</Menu.Item>
                             <Menu.Item key="Projects">Projects</Menu.Item>
@@ -31,10 +61,16 @@ class Employee extends Component {
                             <Breadcrumb.Item>List</Breadcrumb.Item>
                         </Breadcrumb>
                         <div className={styles.siteLayoutContent}>
-                            <EmployeeList></EmployeeList>
-                        </div>
-                        <div>
-                            <AddEmployee onFormSubmit={this.onAddEmployeeFormSubmit}></AddEmployee>
+                            <EmployeeList
+                                onEditEmployeeDetail={this.editEmployeeDetails}
+                                onDeleteEmployeeDetail={this.deleteEmployeeDetails}
+                            ></EmployeeList>
+                            <AddEmployee
+                                isEditMode={this.state.isUpdatingEmployeeDetails}
+                                employeeDetails={this.employeeDetails}
+                                onFormSubmit={this.onAddEmployeeFormSubmit}
+                                onSuccessUpdating={this.onSuccessUpdatingEmployeeDetails}
+                            ></AddEmployee>
                         </div>
                     </Content>
                     <Footer style={{ textAlign: 'center' }}>©2020 Created by Dharini</Footer>
@@ -43,5 +79,12 @@ class Employee extends Component {
         );
     }
 }
+
+/**
+ * <Router>
+                            <Route path="/" component={EmployeeList} />
+                            <Route path="/add-employee" component={AddEmployee} />
+                        </Router>
+ */
 
 export default Employee;

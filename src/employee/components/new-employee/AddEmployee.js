@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useMutation } from '@apollo/react-hooks';
 import { Form, Input, InputNumber, Button } from 'antd';
 import gql from 'graphql-tag';
@@ -24,6 +24,9 @@ const validateMessages = {
 };
 
 const AddEmployee = (props) => {
+
+    const [form] = Form.useForm();
+
     const Add_Employee = gql`
         mutation AddEmployee($firstname:String!,$middlename:String!,$lastname:String!,$age:Int,$designation:String) {
             addEmployee(firstname: $firstname, middlename: $middlename, lastname: $lastname, age: $age, designation: $designation) {
@@ -31,18 +34,56 @@ const AddEmployee = (props) => {
             }
         }
     `;
-    const [addTodo] = useMutation(Add_Employee);
+    const [addNewEmployee] = useMutation(Add_Employee);
+
+    const Update_Employee = gql`
+        mutation UpdateEmployeeDetails($id:ID!, $firstname:String!,$middlename:String!,$lastname:String!,$age:Int,$designation:String) {
+            updateEmployee(id:$id, firstname: $firstname, middlename: $middlename, lastname: $lastname, age: $age, designation: $designation) {
+                id
+            }
+        }
+    `;
+    const [updateEmployeeDetails] = useMutation(Update_Employee);
+
+    function usePrevious(value) {
+        const ref = useRef();
+        useEffect(() => {
+            ref.current = value;
+        });
+        return ref.current;
+    }
+
+    const { isEditMode } = props
+    const prevState = usePrevious({ isEditMode });
+
+    useEffect(() => {
+        console.log('prev: ', prevState);
+        console.log(props.isEditMode);
+        if (prevState && props.isEditMode !== prevState.isEditMode) {
+            form.setFieldsValue(props.employeeDetails);
+        }
+    });
 
     const onFinish = values => {
         console.log(values);
-        addTodo({ variables: values['user'] });
+        if (!props.isEditMode) {
+            addNewEmployee({ variables: values });
+        } else {
+            values['id'] = props.employeeDetails['id'];
+            updateEmployeeDetails({ variables: values });
+            // props.onSuccessUpdatingEmployeeDetails(values);
+        }
+    };
+
+    const onReset = () => {
+        form.resetFields();
     };
 
     // onFinish={(values) => props.onFormSubmit(values)}
     return (
-        <Form {...layout} name="nest-messages" onFinish={onFinish} validateMessages={validateMessages}>
+        <Form {...layout} form={form} name="nest-messages" onFinish={onFinish} validateMessages={validateMessages}>
             <Form.Item
-                name={['user', 'firstname']}
+                name={['firstname']}
                 label="First Name"
                 rules={[
                     {
@@ -53,7 +94,7 @@ const AddEmployee = (props) => {
                 <Input />
             </Form.Item>
             <Form.Item
-                name={['user', 'middlename']}
+                name={['middlename']}
                 label="Middle Name"
                 rules={[
                     {
@@ -64,7 +105,7 @@ const AddEmployee = (props) => {
                 <Input />
             </Form.Item>
             <Form.Item
-                name={['user', 'lastname']}
+                name={['lastname']}
                 label="Last Name"
                 rules={[
                     {
@@ -75,7 +116,7 @@ const AddEmployee = (props) => {
                 <Input />
             </Form.Item>
             <Form.Item
-                name={['user', 'age']}
+                name={['age']}
                 label="Age"
                 rules={[
                     {
@@ -87,12 +128,15 @@ const AddEmployee = (props) => {
             >
                 <InputNumber />
             </Form.Item>
-            <Form.Item name={['user', 'designation']} label="Designation">
+            <Form.Item name={['designation']} label="Designation">
                 <Input />
             </Form.Item>
             <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
                 <Button type="primary" htmlType="submit">
                     Submit
+                </Button>
+                <Button htmlType="button" onClick={onReset}>
+                    Reset
                 </Button>
             </Form.Item>
         </Form>
