@@ -1,84 +1,133 @@
 import React, { Component } from 'react';
-import { Layout, Menu, Breadcrumb } from 'antd';
+import { Layout, Menu, Button, Modal } from 'antd';
 import EmployeeList from './components/emoloyee-list/EmployeeList';
 import styles from './Employees.module.scss';
 import AddEmployee from './components/new-employee/AddEmployee';
+import { BrowserRouter as Router } from "react-router-dom";
+import { PlusOutlined } from '@ant-design/icons';
 
 const { Header, Content, Footer } = Layout;
 
 class Employee extends Component {
     employeeDetails;
+    refetchList;
     state = {
-        isUpdatingEmployeeDetails: false
-    }
-
-    onAddEmployeeFormSubmit = (values) => {
-        console.log(values);
-    }
-
-    changeNavigation = (selectedItem) => {
-        console.log(selectedItem);
+        isUpdatingEmployeeDetails: false,
+        isVisibleEmployeeModal: false
     }
 
     editEmployeeDetails = (details) => {
-        console.log(details);
         this.employeeDetails = details;
         this.setState(state => ({
-            ...state,
-            isUpdatingEmployeeDetails: true
+            isUpdatingEmployeeDetails: true,
+            isVisibleEmployeeModal: true
         }));
     }
 
     onSuccessUpdatingEmployeeDetails = (data) => {
-        console.log(data);
+        this.getEmployeeListData();
         this.setState(state => ({
-            ...state,
             isUpdatingEmployeeDetails: false
+        }));
+        this.openEmployeeModal(false);
+    }
+
+    onSuccessAddingEmployeeDetails = (data) => {
+        this.getEmployeeListData();
+        this.openEmployeeModal(false);
+    }
+
+    openEmployeeModal = isVisible => {
+        if (!isVisible) {
+            Modal.destroyAll();
+        }
+        this.setState(state => ({
+            isUpdatingEmployeeDetails: !isVisible ? false : state.isUpdatingEmployeeDetails,
+            isVisibleEmployeeModal: isVisible
         }));
     }
 
-    deleteEmployeeDetails = (employeeID) => {
-        console.log(employeeID);
+    getRefetchListFunction = refetchList => {
+        this.refetchList = refetchList;
+    }
+
+    getEmployeeListData = () => {
+        if (this.refetchList) {
+            this.refetchList();
+        }
     }
 
     render() {
         return (
-            <div>
-                <Layout className="layout">
-                    <Header>
-                        <div className={styles.logo} />
-                        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['Employees']}
-                            onClick={this.changeNavigation}>
-                            <Menu.Item key="Employees">Employees</Menu.Item>
-                            <Menu.Item key="AddNewEmployee">Add new Employee</Menu.Item>
-                            <Menu.Item key="Projects">Projects</Menu.Item>
-                        </Menu>
-                    </Header>
-                    <Content style={{ padding: '0 50px' }}>
-                        <Breadcrumb style={{ margin: '16px 0' }}>
-                            <Breadcrumb.Item>Home</Breadcrumb.Item>
-                            <Breadcrumb.Item>Employee</Breadcrumb.Item>
-                            <Breadcrumb.Item>List</Breadcrumb.Item>
-                        </Breadcrumb>
-                        <div className={styles.siteLayoutContent}>
-                            <EmployeeList
-                                onEditEmployeeDetail={this.editEmployeeDetails}
-                                onDeleteEmployeeDetail={this.deleteEmployeeDetails}
-                            ></EmployeeList>
+            <Router>
+                <div>
+                    <Layout className="layout">
+                        <Header>
+                            <div className={styles.logo} />
+                            <Menu theme="dark"
+                                selectedKeys={this.state.activeRoute}
+                                mode="horizontal" defaultSelectedKeys={['Employees']}>
+                                <Menu.Item key="Employees">Employees</Menu.Item>
+                            </Menu>
+                        </Header>
+                        <Button type="primary"
+                            style={{ float: 'right', margin: '15px', width: '15%' }}
+                            onClick={() => this.openEmployeeModal(true)}>
+                            <PlusOutlined /> Add New Employee
+                        </Button>
+                        <Content style={{ padding: '0 50px' }}>
+                            <div className={styles.siteLayoutContent}>
+                                <EmployeeList
+                                    refetchList={this.getRefetchListFunction}
+                                    onEditEmployeeDetail={this.editEmployeeDetails}
+                                ></EmployeeList>
+                            </div>
+                        </Content>
+                        <Modal
+                            title={this.state.isUpdatingEmployeeDetails ? 'Update Employee Details' : 'Add new Employee'}
+                            centered
+                            visible={this.state.isVisibleEmployeeModal}
+                            footer={null}
+                            onCancel={() => this.openEmployeeModal(false)}
+                        >
                             <AddEmployee
                                 isEditMode={this.state.isUpdatingEmployeeDetails}
                                 employeeDetails={this.employeeDetails}
                                 onFormSubmit={this.onAddEmployeeFormSubmit}
                                 onSuccessUpdating={this.onSuccessUpdatingEmployeeDetails}
+                                onSuccessAdding={this.onSuccessAddingEmployeeDetails}
                             ></AddEmployee>
-                        </div>
-                    </Content>
-                    <Footer style={{ textAlign: 'center' }}>©2020 Created by Dharini</Footer>
-                </Layout>
-            </div>
+                        </Modal>
+                        <Footer style={{ textAlign: 'center' }}>©2020 Created by Dharini</Footer>
+                    </Layout>
+                </div>
+            </Router>
         );
     }
 }
+
+/**
+ * <Route exact path="/">
+                                        <EmployeeList
+                                            onEditEmployeeDetail={this.editEmployeeDetails}
+                                        ></EmployeeList>
+                                    </Route>
+                                    <Route path="/new-employee">
+                                        <AddEmployee
+                                            isEditMode={this.state.isUpdatingEmployeeDetails}
+                                            employeeDetails={this.employeeDetails}
+                                            onFormSubmit={this.onAddEmployeeFormSubmit}
+                                            onSuccessUpdating={this.onSuccessUpdatingEmployeeDetails}
+                                        ></AddEmployee>
+                                    </Route>
+
+                                    <Menu.Item key="Employees">
+                                    <Link to="/">Employees</Link>
+                                </Menu.Item>
+                                <Menu.Item key="AddNewEmployee">
+                                    <Link to="/new-employee">Add new Employee</Link>
+                                </Menu.Item>
+ */
 
 /**
  * <Router>

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useMutation } from '@apollo/react-hooks';
 import { Form, Input, InputNumber, Button } from 'antd';
-import gql from 'graphql-tag';
+import { AddNewEmployee, UpdateEmployee } from '../../graphQL/mutation';
 
 const layout = {
     labelCol: {
@@ -27,23 +27,21 @@ const AddEmployee = (props) => {
 
     const [form] = Form.useForm();
 
-    const Add_Employee = gql`
-        mutation AddEmployee($firstname:String!,$middlename:String!,$lastname:String!,$age:Int,$designation:String) {
-            addEmployee(firstname: $firstname, middlename: $middlename, lastname: $lastname, age: $age, designation: $designation) {
-                id
+    const Add_Employee = AddNewEmployee;
+    const [addNewEmployee] = useMutation(Add_Employee, {
+        onCompleted(response) {
+            if (response && response['addEmployee'] && response['addEmployee']['id']) {
+                props.onSuccessAdding(response);
             }
         }
-    `;
-    const [addNewEmployee] = useMutation(Add_Employee);
+    });
 
-    const Update_Employee = gql`
-        mutation UpdateEmployeeDetails($id:ID!, $firstname:String!,$middlename:String!,$lastname:String!,$age:Int,$designation:String) {
-            updateEmployee(id:$id, firstname: $firstname, middlename: $middlename, lastname: $lastname, age: $age, designation: $designation) {
-                id
-            }
+    const Update_Employee = UpdateEmployee;
+    const [updateEmployeeDetails] = useMutation(Update_Employee, {
+        onCompleted(response) {
+            props.onSuccessUpdating(response);
         }
-    `;
-    const [updateEmployeeDetails] = useMutation(Update_Employee);
+    });
 
     function usePrevious(value) {
         const ref = useRef();
@@ -57,21 +55,18 @@ const AddEmployee = (props) => {
     const prevState = usePrevious({ isEditMode });
 
     useEffect(() => {
-        console.log('prev: ', prevState);
-        console.log(props.isEditMode);
-        if (prevState && props.isEditMode !== prevState.isEditMode) {
+        onReset();
+        if ((prevState && props.isEditMode && !prevState.isEditMode) || (!prevState && props.isEditMode)) {
             form.setFieldsValue(props.employeeDetails);
         }
     });
 
     const onFinish = values => {
-        console.log(values);
         if (!props.isEditMode) {
             addNewEmployee({ variables: values });
         } else {
             values['id'] = props.employeeDetails['id'];
             updateEmployeeDetails({ variables: values });
-            // props.onSuccessUpdatingEmployeeDetails(values);
         }
     };
 
@@ -81,7 +76,8 @@ const AddEmployee = (props) => {
 
     // onFinish={(values) => props.onFormSubmit(values)}
     return (
-        <Form {...layout} form={form} name="nest-messages" onFinish={onFinish} validateMessages={validateMessages}>
+        <Form {...layout} form={form} name="nest-messages" onFinish={onFinish}
+            validateMessages={validateMessages}>
             <Form.Item
                 name={['firstname']}
                 label="First Name"
