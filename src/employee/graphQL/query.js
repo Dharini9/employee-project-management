@@ -8,10 +8,18 @@ export const GetEmployeeList = gql`{
         middlename
         designation
         age
-        projects {
-            id
-            name
-            description
-        }
     } 
 }`;
+
+export const GetEmployeeByID = gql`
+    query getEmployeeDetailByID($id:ID!){
+        getEmployee(id: $id){
+            id
+            firstname
+            lastname
+            middlename
+            designation
+            age
+        }
+    }
+`;

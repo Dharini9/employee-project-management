@@ -1,7 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { useMutation } from '@apollo/react-hooks';
 import { Form, Input, InputNumber, Button } from 'antd';
-import { AddNewEmployee, UpdateEmployee } from '../../graphQL/mutation';
 
 const layout = {
     labelCol: {
@@ -27,22 +25,6 @@ const AddEmployee = (props) => {
 
     const [form] = Form.useForm();
 
-    const Add_Employee = AddNewEmployee;
-    const [addNewEmployee] = useMutation(Add_Employee, {
-        onCompleted(response) {
-            if (response && response['addEmployee'] && response['addEmployee']['id']) {
-                props.onSuccessAdding(response);
-            }
-        }
-    });
-
-    const Update_Employee = UpdateEmployee;
-    const [updateEmployeeDetails] = useMutation(Update_Employee, {
-        onCompleted(response) {
-            props.onSuccessUpdating(response);
-        }
-    });
-
     function usePrevious(value) {
         const ref = useRef();
         useEffect(() => {
@@ -63,10 +45,10 @@ const AddEmployee = (props) => {
 
     const onFinish = values => {
         if (!props.isEditMode) {
-            addNewEmployee({ variables: values });
+            props.onSuccessAdding({ variables: values });
         } else {
             values['id'] = props.employeeDetails['id'];
-            updateEmployeeDetails({ variables: values });
+            props.onSuccessUpdating({ variables: values });
         }
     };
 
