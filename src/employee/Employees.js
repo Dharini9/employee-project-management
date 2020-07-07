@@ -18,6 +18,7 @@ const Employee = () => {
     const [updatingEmployeeDetails, setUpdatingEmployeeDetail] = useState({});
     const [employeeDataSource, setEmployeeDataSource] = useState({ getEmployees: [] });
 
+    /** Query for getting Employee list */
     const { loading, error, refetch } = useQuery(GetEmployeeList, {
         onCompleted(response) {
             setEmployeeDataSource(response);
@@ -25,6 +26,7 @@ const Employee = () => {
         notifyOnNetworkStatusChange: true
     });
 
+    /** Query for getting employee by id */
     const [getEmployeeByID] = useLazyQuery(GetEmployeeByID, {
         onCompleted(response) {
             if (response && response.getEmployee) {
@@ -36,6 +38,7 @@ const Employee = () => {
         fetchPolicy: 'network-only'
     })
 
+    /** Delete employee */
     const Delete_Employee = DeleteEmployee;
     const [deleteEmployee] = useMutation(Delete_Employee, {
         onCompleted(response) {
@@ -43,6 +46,7 @@ const Employee = () => {
         }
     });
 
+    /** Adding new Employee */
     const Add_Employee = AddNewEmployee;
     const [addNewEmployee] = useMutation(Add_Employee, {
         onCompleted(response) {
@@ -53,6 +57,7 @@ const Employee = () => {
         }
     });
 
+    /** Updating employee details */
     const Update_Employee = UpdateEmployee;
     const [updateEmployeeDetails] = useMutation(Update_Employee, {
         onCompleted(response) {
@@ -78,8 +83,8 @@ const Employee = () => {
         if (!isVisible) {
             Modal.destroyAll();
         }
-        setIsUpdatingEmployeeDetails(!isVisible ? false : isUpdatingEmployeeDetails);
         setIsVisibleEmployeeModal(isVisible);
+        setIsUpdatingEmployeeDetails(!isVisible ? false : isUpdatingEmployeeDetails);
     }
 
     const deleteEmployeeDetail = deletedEmployeeID => {
